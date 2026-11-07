@@ -169,4 +169,12 @@ canvas.c-pen,canvas.c-erase{cursor:crosshair}canvas.c-fill{cursor:cell}
 @keyframes talk{0%,100%{box-shadow:inset 0 -3px #0003,0 0 0 0 #22c55e00}50%{box-shadow:inset 0 -3px #0003,0 0 0 6px #22c55ecc}}
 .toast{position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:20;background:#fee2e2;color:#b91c1c;padding:12px 18px;border-radius:14px;font-weight:700;box-shadow:0 10px 30px #0005;animation:rise .4s both;max-width:92vw;text-align:center}
 @media(max-width:760px){.mic{padding:8px 10px;font-size:12px}.room span{display:none}}
+.invite{text-align:center;background:linear-gradient(135deg,#eef2ff,#fce7f3);border-radius:18px;padding:14px 12px;animation:rise .5s both}
+.inv-t{font-weight:900;font-size:18px;color:#4338ca}
+.inv-code{display:flex;gap:8px;justify-content:center;margin:10px 0}
+.inv-code b{width:48px;height:58px;display:grid;place-items:center;font:900 30px ui-monospace,Menlo,monospace;color:#1e1b4b;background:#fff;border-radius:12px;box-shadow:0 4px 0 #c7d2fe;animation:pop .5s calc(var(--i)*.08s) both}
+.inv-s{color:#64748b;font-weight:600;font-size:14px}
+.inv-x{margin-top:8px;background:none;border:0;color:#6366f1;font-weight:700;cursor:pointer;text-decoration:underline;font-size:13px}
+.invbtns{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.lnk{font-size:12px;opacity:.7;word-break:break-all;max-width:90%}
 @media(prefers-reduced-motion:reduce){.game *,.gbg,.gbg *,.ov *{animation:none!important}}

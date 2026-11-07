@@ -16,7 +16,7 @@ const NONE: Player[] = [];
 export default function Page() {
   const { screen, err, v, peer, cv, code, isHost, create, join, net } = useGame();
   const canDraw = !!v && v.me === v.drawer && v.phase === 'drawing';
-  const voice = useVoice(peer, v?.players ?? NONE, canDraw); // the drawer is auto-muted so they can't give hints
+  const voice = useVoice(peer, v?.players ?? NONE, false); // everyone, including the drawer, can talk
   const t = v?.time ?? 0, ph = v?.phase;
   useEffect(() => { if (ph === 'drawing' && t > 0 && t <= 10) beep(500 + (10 - t) * 40, 80); }, [t, ph]);
 
@@ -28,7 +28,7 @@ export default function Page() {
   const pct = playing ? Math.max(0, (v.time / total) * 100) : 0;
   const label = v.phase === 'drawing' ? (canDraw ? 'DRAW THIS' : 'GUESS THIS') : '';
   const title = v.phase === 'lobby' ? 'Waiting for players…' : v.phase === 'end' ? 'Game over' : v.word || v.hint || '…';
-  const mic = !voice.on ? { c: 'off', t: '🎤 Join voice' } : canDraw ? { c: 'forced', t: '🤐 Muted while drawing' } : voice.muted ? { c: 'muted', t: '🔇 Unmute' } : { c: 'live', t: '🎙️ Mic on' };
+  const mic = !voice.on ? { c: 'off', t: '🎤 Join voice' } : voice.muted ? { c: 'muted', t: '🔇 Unmute' } : { c: 'live', t: '🎙️ Mic on' };
 
   return (
     <>
@@ -44,7 +44,7 @@ export default function Page() {
           </div>
           <div className="room">
             <span>Room <b>{code}</b></span>
-            <button className={'mic ' + mic.c} onClick={voice.toggle} disabled={mic.c === 'forced'}>{mic.t}</button>
+            <button className={'mic ' + mic.c} onClick={voice.toggle}>{mic.t}</button>
           </div>
         </header>
         <div className="bar"><i style={{ width: pct + '%', background: `hsl(${pct * 1.2} 85% 55%)` }} /></div>

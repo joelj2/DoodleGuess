@@ -16,10 +16,16 @@ export default function Home({ err, onCreate, onJoin }: Props) {
   const [name, setName] = useState('');
   const [chars, setChars] = useState(['', '', '', '']);
   const [busy, setBusy] = useState(false);
+  const [invite, setInvite] = useState('');
   const refs = useRef<(HTMLInputElement | null)[]>([]);
   const code = chars.join('');
 
   useEffect(() => { setBusy(false); }, [err]);
+  useEffect(() => { // opened from an invite link like /?room=ABCD
+    const r = new URLSearchParams(window.location.search).get('room');
+    if (r && /^[A-Za-z]{4}$/.test(r)) { const c = r.toUpperCase(); setInvite(c); setMode('join'); setChars(c.split('')); }
+  }, []);
+  const leaveInvite = () => { setInvite(''); setChars(['', '', '', '']); window.history.replaceState(null, '', window.location.pathname); };
 
   const setAt = (i: number, val: string) => {
     const ch = val.toUpperCase().replace(/[^A-Z]/g, '').slice(-1);
@@ -57,18 +63,27 @@ export default function Home({ err, onCreate, onJoin }: Props) {
       <form className="glass" onSubmit={submit}>
         <div className="pwrap"><div className="pav" key={name.length} style={{ background: name ? avatar(name) : '#94a3b8' }}>{name ? name[0].toUpperCase() : '✏️'}</div></div>
 
+        {invite ? (
+          <div className="invite">
+            <div className="inv-t">🎉 You’re invited!</div>
+            <div className="inv-code">{invite.split('').map((c, i) => <b key={i} style={{ '--i': i } as CSSProperties}>{c}</b>)}</div>
+            <div className="inv-s">Just enter your name to join the game</div>
+            <button type="button" className="inv-x" onClick={leaveInvite}>Use a different room</button>
+          </div>
+        ) : (
         <div className={'tabs ' + mode}>
           <i />
           <button type="button" className={mode === 'create' ? 'on' : ''} onClick={() => setMode('create')}>Create room</button>
           <button type="button" className={mode === 'join' ? 'on' : ''} onClick={() => setMode('join')}>Join room</button>
         </div>
+        )}
 
         <label className="fld">
           <input placeholder=" " maxLength={14} value={name} autoFocus autoComplete="off" onChange={(e) => setName(e.target.value)} />
           <span>Your nickname</span>
         </label>
 
-        {mode === 'join' && (
+        {mode === 'join' && !invite && (
           <div className="codewrap">
             <div className="clab">Enter room code</div>
             <div className="code">
@@ -81,7 +96,7 @@ export default function Home({ err, onCreate, onJoin }: Props) {
         )}
 
         <button className={'cta ' + mode} type="submit" disabled={busy}>
-          {busy ? <><span className="spin" />Connecting…</> : mode === 'create' ? '🎨  Create room' : '🚀  Join room'}
+          {busy ? <><span className="spin" />Connecting…</> : mode === 'create' ? '🎨  Create room' : invite ? '🚀  Join game' : '🚀  Join room'}
         </button>
         {err && <p key={err} className="err">⚠️ {err}</p>}
       </form>

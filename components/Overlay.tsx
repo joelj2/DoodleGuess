@@ -10,6 +10,8 @@ const Dots = () => <span className="dots"><i /><i /><i /></span>;
 export default function Overlay({ v, code, isHost, net }: Props) {
   const [rounds, setRounds] = useState(3);
   const [copied, setCopied] = useState(false);
+  const link = () => `${location.origin}${location.pathname}?room=${code}`;
+  const canShare = typeof navigator !== 'undefined' && 'share' in navigator;
   const sorted = [...v.players].sort((a, b) => b.score - a.score);
   const drawer = v.players.find((p) => p.id === v.drawer);
 
@@ -17,9 +19,13 @@ export default function Overlay({ v, code, isHost, net }: Props) {
     <div className="ov">
       <div className="lab">Room code</div>
       <h2>{code}</h2>
-      <button className="btn ghost" onClick={() => { navigator.clipboard?.writeText(`Join my DoodleGuess room ${code}: ${location.href}`); setCopied(true); }}>
-        {copied ? '✔ Copied' : '📋 Copy invite'}
-      </button>
+      <div className="invbtns">
+        <button className="btn ghost" onClick={() => { navigator.clipboard?.writeText(`Join my DoodleGuess room ${code}: ${link()}`); setCopied(true); setTimeout(() => setCopied(false), 2500); }}>
+          {copied ? '✔ Link copied' : '🔗 Copy invite link'}
+        </button>
+        {canShare && <button className="btn ghost" onClick={() => navigator.share({ title: 'DoodleGuess', text: 'Join my DoodleGuess room!', url: link() }).catch(() => {})}>📤 Share</button>}
+      </div>
+      <div className="lnk">{link()}</div>
       <div className="roster">{v.players.map((p) => <span key={p.id} className="av" title={p.name} style={{ background: avatar(p.name) }}>{p.name[0]?.toUpperCase()}</span>)}</div>
       <div className="lab">{v.players.length} player{v.players.length > 1 ? 's' : ''} in the lobby</div>
       {isHost ? (
