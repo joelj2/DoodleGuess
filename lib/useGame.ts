@@ -10,7 +10,7 @@ interface Room {
   segs: Stroke[]; G: GameState; host: boolean; code: string; timer: ReturnType<typeof setInterval> | null;
 }
 const blank = (name = ''): GameState => ({
-  players: name ? [{ id: 'host', name, score: 0 }] : [], phase: 'lobby', round: 0, rounds: 3,
+  players: name ? [{ id: 'host', pid: '', name, score: 0 }] : [], phase: 'lobby', round: 0, rounds: 3,
   order: [], turn: 0, drawer: null, word: '', rev: [], opts: [], time: 0, chat: [], guessed: {}, gain: {},
 });
 
@@ -26,6 +26,7 @@ export function useGame() {
   const [screen, setScreen] = useState<'home' | 'game'>('home');
   const [err, setErr] = useState('');
   const [v, setV] = useState<View | null>(null);
+  const [peer, setPeer] = useState<Peer | null>(null);
   const cv = useRef<HTMLCanvasElement>(null);
   const R = useRef<Room>({ conns: {}, conn: null, peer: null, segs: [], G: blank(), host: false, code: '', timer: null }).current;
 
@@ -105,7 +106,7 @@ export function useGame() {
     if (m.t === 'join') {
       if (G.players.length >= 12) return;
       const n = (m.name || 'Player').slice(0, 14);
-      G.players.push({ id, name: n, score: 0 });
+      G.players.push({ id, pid: id, name: n, score: 0 });
       send(id, { t: 'full', segs: R.segs }); say(`${n} joined the room`, null, true); bc();
     } else if (m.t === 'start') {
       if (id !== 'host' || (G.phase !== 'lobby' && G.phase !== 'end')) return;
@@ -150,7 +151,7 @@ export function useGame() {
     const peer = new Peer('doodle-' + c, { config: ICE }); R.peer = peer;
     peer.on('error', (e) => (e.type === 'unavailable-id' && tries < 5 ? create(name, tries + 1) : setErr('Connection error: ' + e.type)));
     peer.on('open', () => {
-      R.host = true; R.code = c; R.G = blank(name.trim().slice(0, 14));
+      R.host = true; R.code = c; R.G = blank(name.trim().slice(0, 14)); R.G.players[0].pid = peer.id; setPeer(peer);
       peer.on('connection', (conn) => {
         conn.on('open', () => { R.conns[conn.peer] = conn; });
         conn.on('data', (m) => handle(conn.peer, m as ClientMsg));
@@ -165,6 +166,7 @@ export function useGame() {
     const peer = new Peer({ config: ICE }); R.peer = peer;
     peer.on('error', (e) => setErr(e.type === 'peer-unavailable' ? 'Room not found' : 'Connection error: ' + e.type));
     peer.on('open', () => {
+      setPeer(peer);
       const conn = peer.connect('doodle-' + code.toUpperCase(), { reliable: true });
       R.conn = conn; R.code = code.toUpperCase();
       conn.on('open', () => { conn.send({ t: 'join', name: name.trim() } satisfies ClientMsg); setErr(''); setScreen('game'); });
@@ -176,5 +178,5 @@ export function useGame() {
   useEffect(() => { redraw(); }, [screen]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => () => { if (R.timer) clearInterval(R.timer); R.peer?.destroy(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  return { screen, err, v, cv, code: R.code, isHost: R.host, create, join, net };
+  return { screen, err, v, peer, cv, code: R.code, isHost: R.host, create, join, net };
 }

@@ -4,7 +4,7 @@ export const H = 700;
 export type Phase = 'lobby' | 'choosing' | 'drawing' | 'reveal' | 'end';
 export type Pt = [number, number];
 
-export interface Player { id: string; name: string; score: number }
+export interface Player { id: string; pid: string; name: string; score: number }
 export interface ChatMsg { text: string; n?: string | null; sys?: boolean; ok?: boolean; to?: string }
 export interface Seg { t: 'seg'; k: string; c: string; w: number; a: Pt; b: Pt }
 export interface Fill { t: 'fill'; k: string; c: string; a: Pt }

@@ -68,8 +68,8 @@ header{grid-column:1/-1;padding:0 20px;display:grid;grid-template-columns:76px 1
 .clock::before{content:'';position:absolute;inset:6px;background:#fff;border-radius:50%}.clock b{position:relative}
 .clock.hot{--rc:#ef4444;color:#dc2626;animation:pulse .5s infinite alternate}
 @keyframes pulse{to{transform:scale(1.12)}}
-.round{font-weight:800;color:#6366f1}.room{text-align:right;color:#64748b}.room b{font-size:20px;letter-spacing:3px;color:var(--ink)}
-.wordbox{text-align:center}.wordbox small{display:block;height:13px;font-size:11px;letter-spacing:3px;font-weight:800;color:#ec4899;animation:blink 1.4s infinite}
+.round{font-weight:800;color:#6366f1}.room{display:flex;justify-content:flex-end;align-items:center;gap:12px;color:#64748b}.room b{font-size:20px;letter-spacing:3px;color:var(--ink)}
+.rn{display:none}.wordbox{text-align:center}.wordbox small{display:block;height:13px;font-size:11px;letter-spacing:3px;font-weight:800;color:#ec4899;animation:blink 1.4s infinite}
 @keyframes blink{50%{opacity:.45}}
 .word{font:900 36px/1.1 ui-monospace,Menlo,monospace;letter-spacing:4px;color:var(--ink);white-space:pre}
 .ch{display:inline-block;white-space:pre;animation:pop .45s cubic-bezier(.2,1.6,.4,1)}
@@ -141,17 +141,32 @@ canvas.c-pen,canvas.c-erase{cursor:crosshair}canvas.c-fill{cursor:cell}
 @media(min-width:761px) and (max-width:1000px){.game{grid-template-columns:190px minmax(0,1fr) 240px}.rk{display:none}.pl{grid-template-columns:42px 1fr 22px}.pal{grid-template-columns:repeat(10,28px)}.sw{width:28px;height:28px}}
 @media(max-height:520px) and (min-width:761px){.game{grid-template-rows:54px 6px minmax(0,1fr)}.word{font-size:24px}.tools{padding:6px}}
 @media(max-width:760px){
-  .game{grid-template-columns:1fr;grid-template-rows:auto 6px auto auto minmax(0,1fr);gap:8px;padding:8px;overflow:hidden}
-  header{grid-template-columns:52px 1fr auto;padding:6px 12px;row-gap:2px}
-  .clock{width:46px;height:46px;font-size:18px}.round{grid-column:2}.room{grid-column:3;grid-row:1}
-  .wordbox{grid-column:1/-1;grid-row:2}.word{font-size:26px;letter-spacing:3px}
-  .stage{order:1}.players{order:2;flex-direction:row;overflow-x:auto;padding:6px}.chat{order:3;padding:8px}
+  html,body{overscroll-behavior:none}
+  /* one flexible column: the canvas takes whatever space is left, so nothing is ever cut off */
+  .game{display:flex;flex-direction:column;gap:8px;padding:8px;height:100dvh;overflow:hidden}
+  header{display:grid;grid-template-columns:46px minmax(0,1fr) auto;gap:8px;padding:6px 10px;border-radius:16px;flex:none}
+  .clock{width:44px;height:44px;font-size:17px}.round{display:none}.rn{display:inline}
+  .wordbox{grid-column:auto;grid-row:auto;min-width:0}.word{font-size:clamp(18px,6.4vw,28px);letter-spacing:2px}
+  .room{grid-column:auto;grid-row:auto}
+  .bar{flex:none;height:6px}
+  .stage{order:1;flex:1;min-height:0;gap:8px}
+  .cwrap{flex:1;min-height:0;width:100%}
+  .players{order:2;flex:none;flex-direction:row;overflow-x:auto;padding:6px}
   .pl{min-width:130px;grid-template-columns:34px 1fr 20px}.rk{display:none}.av{width:34px;height:34px;font-size:15px}
-  .cwrap{flex:none;width:100%;aspect-ratio:10/7}
-  .tools{padding:8px;gap:8px;justify-content:space-between}.cur{display:none}
-  .pal{display:flex;overflow-x:auto;width:100%;padding:2px}.sw{flex:0 0 32px;width:32px;height:32px}
-  .tb{width:44px;height:44px;font-size:20px}.sz{width:36px;height:36px}
+  .chat{order:3;flex:none;height:clamp(150px,27dvh,240px);padding:8px}
+  .tools{flex:none;padding:6px 8px;gap:6px;justify-content:space-between}.cur{display:none}
+  .pal{display:flex;overflow-x:auto;width:100%;padding:2px}.sw{flex:0 0 30px;width:30px;height:30px}
+  .tb{width:42px;height:42px;font-size:19px}.sz{width:34px;height:34px}
   .ov{gap:10px;padding:12px}.ov h2{font-size:44px}.av.xl{width:70px;height:70px;font-size:32px}
   .opts .btn.big{font-size:18px;padding:10px 18px}
 }
+.mic{border:0;border-radius:999px;padding:10px 16px;font-weight:800;font-size:14px;cursor:pointer;color:#fff;white-space:nowrap;box-shadow:0 4px 0 #0003;transition:transform .12s,filter .2s}
+.mic:hover{transform:translateY(-2px)}.mic:active{transform:translateY(3px);box-shadow:none}
+.mic.off{background:linear-gradient(135deg,#6366f1,#ec4899)}
+.mic.live{background:linear-gradient(135deg,#22c55e,#15803d);animation:glow 1.6s infinite}
+.mic.muted{background:linear-gradient(135deg,#ef4444,#b91c1c)}.mic.forced{background:#94a3b8;cursor:not-allowed}
+.av.talk{animation:talk .8s infinite}
+@keyframes talk{0%,100%{box-shadow:inset 0 -3px #0003,0 0 0 0 #22c55e00}50%{box-shadow:inset 0 -3px #0003,0 0 0 6px #22c55ecc}}
+.toast{position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:20;background:#fee2e2;color:#b91c1c;padding:12px 18px;border-radius:14px;font-weight:700;box-shadow:0 10px 30px #0005;animation:rise .4s both;max-width:92vw;text-align:center}
+@media(max-width:760px){.mic{padding:8px 10px;font-size:12px}.room span{display:none}}
 @media(prefers-reduced-motion:reduce){.game *,.gbg,.gbg *,.ov *{animation:none!important}}
